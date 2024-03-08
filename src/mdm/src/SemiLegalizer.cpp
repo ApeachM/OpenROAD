@@ -61,37 +61,101 @@ void SemiLegalizer::runAbacus(char* targetDieChar, bool topHierDie)
     }
   }
 }
+
+/*
+  Sort cells according to x - position;
+  1 foreach cell i do
+  2   cbest ← ∞;
+  3   for each row r do
+  4     Insert cell i into row r;
+  5     PlaceRow r(trial);
+  6     Determine cost c;
+  7     if c < cbest then cbest = c, rbest = r;
+  8     Remove cell i from row r;
+  9   end
+  10  Insert Cell i to row rbest;
+  11  PlaceRow rbest(final);
+  12 end
+*/
 void SemiLegalizer::runAbacus(odb::dbBlock* block)
 {
   targetBlock_ = block;
-  std::vector<instInRow> rowSet;
 
-  adjustRowCapacity();
-  initRows(&rowSet);
-
-  for (const auto& row : rowSet) {
-    placeRow(row);
-  }
-}
-void SemiLegalizer::initRows(std::vector<instInRow>* rowSet)
-{
-  auto numRows = targetBlock_->getRows().size();
-  auto rowHeight = (*targetBlock_->getRows().begin())->getBBox().dy();
-  rowSet->resize(numRows);
+  std::multiset<odb::dbInst*,
+                std::function<bool(const odb::dbInst*, const odb::dbInst*)>>
+      instSet(targetBlock_->getInsts().begin(),
+              targetBlock_->getInsts().end(),
+              [](const odb::dbInst* a, const odb::dbInst* b) {
+                return a->getLocation().x() < b->getLocation().x();
+              });
+  std::vector<instInRow> rowSet(targetBlock_->getRows().size());
   int yMin = (*targetBlock_->getRows().begin())->getBBox().yMin();
-  for (auto inst : targetBlock_->getInsts()) {
-    auto instY = inst->getLocation().y() + inst->getMaster()->getHeight() / 2;
-    int rowIdx = (instY - yMin) / rowHeight;
-    if (rowIdx >= 0 && rowIdx < numRows) {
-      rowSet->at(rowIdx).push_back(inst);
+  int rowHeight = (*targetBlock_->getRows().begin())->getBBox().dy();
+  for (auto inst : instSet) {
+    int CostBest = std::numeric_limits<int>::max();
+    int rowBest = 0;  // usage: rowSet.at(rowBest);
+    std::pair<int, int> originalLocation
+        = {inst->getLocation().x(), inst->getLocation().y()};
+    int nextSearchDownRow = (originalLocation.second - yMin) / rowHeight;
+    int nextSearchUpRow = nextSearchDownRow + 1;
+    while (nextSearchUpRow < rowSet.size() || nextSearchDownRow >= 0) {
+      if (nextSearchDownRow < 0
+          || (abs(yMin + rowHeight * nextSearchUpRow - originalLocation.first)
+                  < abs(yMin + rowHeight * nextSearchDownRow
+                        - originalLocation.first)
+              && nextSearchUpRow < rowSet.size())) {  // search up
+        if (abs(yMin + rowHeight * nextSearchUpRow - originalLocation.second)
+            > CostBest) {
+          nextSearchUpRow = rowSet.size();
+          continue;
+        }
+        inst->setLocation(originalLocation.first,
+                          yMin + rowHeight * nextSearchUpRow);
+        rowSet.at(nextSearchUpRow).push_back(inst);
+        if (degreeOfExcess(rowSet.at(nextSearchUpRow)) > 0) {
+          rowSet.at(nextSearchUpRow).pop_back();
+          nextSearchUpRow++;
+          continue;
+        }
+        placeRow(rowSet.at(nextSearchUpRow));
+        int cost
+            = std::abs(inst->getLocation().x() - originalLocation.first)
+              + std::abs(inst->getLocation().y() - originalLocation.second);
+        if (cost < CostBest) {
+          CostBest = cost;
+          rowBest = nextSearchUpRow;
+        }
+        rowSet.at(nextSearchUpRow).pop_back();
+        nextSearchUpRow++;
+      } else {  // search down
+        if (abs(yMin + rowHeight * nextSearchDownRow - originalLocation.second)
+            > CostBest) {
+          nextSearchDownRow = -1;
+          continue;
+        }
+        inst->setLocation(originalLocation.first,
+                          yMin + rowHeight * nextSearchDownRow);
+        rowSet.at(nextSearchDownRow).push_back(inst);
+        if (degreeOfExcess(rowSet.at(nextSearchDownRow)) > 0) {
+          rowSet.at(nextSearchDownRow).pop_back();
+          nextSearchDownRow--;
+          continue;
+        }
+        placeRow(rowSet.at(nextSearchDownRow));
+        int cost
+            = std::abs(inst->getLocation().x() - originalLocation.first)
+              + std::abs(inst->getLocation().y() - originalLocation.second);
+        if (cost < CostBest) {
+          CostBest = cost;
+          rowBest = nextSearchDownRow;
+        }
+        rowSet.at(nextSearchDownRow).pop_back();
+        nextSearchDownRow--;
+      }
     }
-    inst->setLocation(inst->getLocation().x(), rowIdx * rowHeight);
-  }
-  for (auto& row : *rowSet) {
-    std::sort(
-        row.begin(), row.end(), [](const odb::dbInst* a, const odb::dbInst* b) {
-          return a->getLocation().x() < b->getLocation().x();
-        });
+    inst->setLocation(originalLocation.first, yMin + rowHeight * rowBest);
+    rowSet.at(rowBest).push_back(inst);
+    placeRow(rowSet.at(rowBest));
   }
 }
 
@@ -407,7 +471,7 @@ void SemiLegalizer::adjustRowCapacity()
 
     int rowClusterMaxIdx = static_cast<int>(rowClusters.size());
     int startIdx = direction == UPWARD ? 0 : rowClusterMaxIdx - 1;
-    int endIdx = direction == UPWARD ? rowClusterMaxIdx : -1;
+    int endIdx = direction == UPWARD ? rowClusterMaxIdx - 1 : 0;
     int step = direction == UPWARD ? 1 : -1;
 
     for (int i = startIdx; direction == UPWARD ? (i < endIdx) : (i > endIdx);
@@ -420,52 +484,37 @@ void SemiLegalizer::adjustRowCapacity()
       uint reducedWidth = 0;
       while (excess > reducedWidth) {
         auto smallestInst = rowCluster.at(0);
-        rowCluster.erase(
-            std::remove(rowCluster.begin(), rowCluster.end(), smallestInst),
-            rowCluster.end());
-
+        rowCluster.erase(rowCluster.begin());
         int targetRowIdx;
-        if (direction == UPWARD) {
-          targetRowIdx = (i == rowClusters.size() - 1) ? i - 1 : i + 1;
-        } else {
-          targetRowIdx = (i == 0) ? i + 1 : i - 1;
-        }
+        targetRowIdx = direction == UPWARD ? i + 1 : i - 1;
         rowClusters.at(targetRowIdx).push_back(smallestInst);
         smallestInst->setLocation(smallestInst->getLocation().x(),
                                   targetRowIdx * rowHeight + yMin);
         reducedWidth += smallestInst->getMaster()->getWidth();
       }
     }
-    if (direction == UPWARD) {
-      direction = DOWNWARD;
-    } else {
-      direction = UPWARD;
-    }
+    direction = direction == UPWARD ? DOWNWARD : UPWARD;
   }
 }
 int SemiLegalizer::degreeOfExcess(const std::vector<odb::dbInst*>& row)
 {
   int rowWidth = (*targetBlock_->getRows().begin())->getBBox().dx();
-
-  int totalWidth = 0;
-  for (auto inst : row) {
-    totalWidth += inst->getMaster()->getWidth();
-  }
-
-  if (totalWidth > rowWidth) {
-    return totalWidth - rowWidth;
-  }
-  return 0;
+  int totalWidth = std::accumulate(
+      row.begin(), row.end(), 0, [](int sum, odb::dbInst* inst) {
+        return sum + inst->getMaster()->getWidth();
+      });
+  return totalWidth > rowWidth ? totalWidth - rowWidth : 0;
 }
 bool SemiLegalizer::utilCheck()
 {
-  int64_t sumArea = 0;
-  for (auto inst : targetBlock_->getInsts()) {
-    sumArea += inst->getMaster()->getWidth() * inst->getMaster()->getHeight();
-  }
-  if (sumArea > targetBlock_->getDieArea().area()) {
-    return false;
-  }
-  return true;
+  int64_t sumArea = std::accumulate(
+      targetBlock_->getInsts().begin(),
+      targetBlock_->getInsts().end(),
+      0,
+      [](int64_t sum, odb::dbInst* inst) {
+        return sum
+               + inst->getMaster()->getWidth() * inst->getMaster()->getHeight();
+      });
+  return sumArea <= targetBlock_->getDieArea().area();
 }
 }  // namespace mdm

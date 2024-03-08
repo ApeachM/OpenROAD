@@ -32,6 +32,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <numeric>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -58,7 +60,7 @@ class SemiLegalizer
 
  public:
   void setDb(odb::dbDatabase* db) { db_ = db; }
-  void run(bool useAbacus = true, char* targetDie="");
+  void run(bool useAbacus = true, char* targetDie = "");
 
  private:
   /**
@@ -68,7 +70,7 @@ class SemiLegalizer
    * https://github.com/limbo018/DREAMPlace/tree/master/dreamplace/ops/abacus_legalize
    * This is the simple and fast legalizer
    * */
-  void runAbacus(char* targetDieChar ="", bool topHierDie = false);
+  void runAbacus(char* targetDieChar = "", bool topHierDie = false);
   /**
    *  Here, we do not implement this considering fixed objects
    *  All object will be considered as movable.
@@ -76,11 +78,10 @@ class SemiLegalizer
    * */
   void runAbacus(odb::dbBlock* block);
 
-  void initRows(std::vector<instInRow>* rowSet);
   void placeRow(instInRow row);
   void addCell(AbacusCluster* cluster, odb::dbInst* inst);
   void collapse(SemiLegalizer::AbacusCluster* cluster,
-                 std::vector<AbacusCluster>& predecessor);
+                std::vector<AbacusCluster>& predecessor);
 
   /**
    * Assume it has single height rows
