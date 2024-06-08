@@ -31,8 +31,13 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <fstream>
+
+#include "TestCaseManager.h"
 #include "mdm/MultiDieManager.hh"
+#include "odb/db.h"
 #include "utl/Logger.h"
+
 namespace mdm {
 using namespace std;
 void MultiDieManager::makeShrunkLefs()
@@ -964,7 +969,7 @@ void MultiDieManager::get3DHPWL(bool approximate)
     hpwl += (box2.dx() + box2.dy());
   }
 
-  hpwl /= testCaseManager_.getScale();
+  hpwl /= testCaseManager_->getScale();
   ostringstream stream;
   stream.imbue(std::locale(""));
   stream << std::fixed << std::setprecision(2) << hpwl;
@@ -1085,11 +1090,11 @@ void MultiDieManager::destroyOneDie(char* DIE)
 void MultiDieManager::parseICCADOutput(char* filenameChar, char* whichDie)
 {
   std::string filename{filenameChar};
-  testCaseManager_.parseICCADOutput(filename, whichDie);
+  testCaseManager_->parseICCADOutput(filename, whichDie);
 }
 void MultiDieManager::setICCADScale(int scale)
 {
-  testCaseManager_.setScale(scale);
+  testCaseManager_->setScale(scale);
 }
 
 }  // namespace mdm

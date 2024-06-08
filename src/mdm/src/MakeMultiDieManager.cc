@@ -33,6 +33,9 @@
 
 #include "mdm/MakeMultiDieManager.hh"
 
+#include "SemiLegalizer.h"
+#include "dpl/Opendp.h"
+#include "dpo/Optdp.h"
 #include "mdm/MultiDieManager.hh"
 #include "ord/OpenRoad.hh"
 #include "sta/StaMain.hh"

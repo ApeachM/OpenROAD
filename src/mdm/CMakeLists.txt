@@ -35,15 +35,15 @@
 
 include("openroad")
 
-project(mdm)
-
 swig_lib(NAME mdm
         NAMESPACE mdm
         I_FILE src/MultiDieManager.i
         SCRIPTS src/MultiDieManager.tcl
 )
+add_library(mdm_lib)
+target_link_libraries(mdm PRIVATE mdm_lib)
 
-target_sources(mdm
+target_sources(mdm_lib
         PRIVATE
         src/MakeMultiDieManager.cc
         src/MultiDieManager.cc
@@ -54,14 +54,11 @@ target_sources(mdm
         src/SemiLegalizer.cpp
 )
 
-target_include_directories(mdm
-        PUBLIC
-        include
-        PRIVATE
-        src
-)
+target_include_directories(mdm_lib PUBLIC include src)
+target_include_directories(mdm PUBLIC include)
 
-target_link_libraries(mdm
+target_link_libraries(mdm_lib
+        PRIVATE
         OpenSTA
         odb
         gpl

@@ -31,7 +31,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
 #include "mdm/MultiDieManager.hh"
+#include "SemiLegalizer.h"
+#include "dpl/Opendp.h"
+#include "dpo/Optdp.h"
+#include "odb/db.h"
+// clang-format on
+
 namespace mdm {
 using namespace std;
 void MultiDieManager::multiDieDPL()

@@ -30,7 +30,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
+
+// clang-format off
+#include <fstream>
 #include "mdm/MultiDieManager.hh"
+#include "TestCaseManager.h"
+// clang-format on
 
 namespace mdm {
 using namespace std;
@@ -38,16 +43,16 @@ using namespace odb;
 
 void MultiDieManager::ICCADParse(const std::string& testCase, bool siteDefined)
 {
-  testCaseManager_.setSiteDefined(siteDefined);
+  testCaseManager_->setSiteDefined(siteDefined);
   // clang-format off
   static const std::unordered_map<std::string, std::function<void()>> testCaseMap {
-      {"2022-test1", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE1, this); }},
-      {"2022-test2", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE2, this); }},
-      {"2022-test2-h", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE2_H, this); }},
-      {"2022-test3", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE3, this); }},
-      {"2022-test3-h", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE3_H, this); }},
-      {"2022-test4", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE4, this); }},
-      {"2022-test4-h", [this]() { testCaseManager_.ICCADContest(TestCaseManager::ICCAD2022_CASE4_H, this); }},
+      {"2022-test1", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE1, this); }},
+      {"2022-test2", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE2, this); }},
+      {"2022-test2-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE2_H, this); }},
+      {"2022-test3", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE3, this); }},
+      {"2022-test3-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE3_H, this); }},
+      {"2022-test4", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE4, this); }},
+      {"2022-test4-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE4_H, this); }},
   };
   // clang-format on
 

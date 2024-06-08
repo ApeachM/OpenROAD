@@ -33,6 +33,17 @@
 
 #include "mdm/MultiDieManager.hh"
 
+#include "SemiLegalizer.h"
+#include "TestCaseManager.h"
+// #include "db_sta/dbNetwork.hh"
+// #include "db_sta/dbSta.hh"
+// #include "dpl/Opendp.h"
+// #include "dpo/Optdp.h"
+// #include "gpl/Replace.h"
+// #include "odb/db.h"
+// #include "par/PartitionMgr.h"
+// #include "utl/Logger.h"
+
 namespace mdm {
 using namespace std;
 
@@ -54,11 +65,14 @@ void MultiDieManager::init(odb::dbDatabase* db,
   opendp_ = opendp;
   sta_ = sta;
 
-  testCaseManager_.setMDM(this);
+  testCaseManager_ = new TestCaseManager();
+  testCaseManager_->setMDM(this);
 }
 
 void MultiDieManager::set3DIC(int numberOfDie, float areaRatio)
 {
+  testCaseManager_->setMDM(this);
+
   numberOfDie_ = numberOfDie;
   shrinkAreaRatio_ = areaRatio;
 
@@ -114,12 +128,12 @@ void MultiDieManager::makeSubBlocks()
         = odb::dbBlock::create(topBlock, dieName.c_str(), *techIter++);
     odb::dbInst::create(topBlock, childBlock, dieName.c_str());
     childBlock->setDieArea(dieArea);
-    if (!testCaseManager_.isICCADParsed()) {
+    if (!testCaseManager_->isICCADParsed()) {
       inheritRows(topBlock, childBlock);
     }
   }
-  if (testCaseManager_.isICCADParsed()) {
-    testCaseManager_.rowConstruction();
+  if (testCaseManager_->isICCADParsed()) {
+    testCaseManager_->rowConstruction();
   }
 }
 void MultiDieManager::switchInstancesToAssignedDie()

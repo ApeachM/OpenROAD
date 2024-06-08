@@ -32,6 +32,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "mdm/MultiDieManager.hh"
+#include "odb/db.h"
+
 namespace mdm {
 using namespace std;
 void SwitchInstanceHelper::switchInstanceToAssignedDie(

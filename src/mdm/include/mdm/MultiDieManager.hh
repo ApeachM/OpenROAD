@@ -40,19 +40,32 @@
 #include <string>
 #include <vector>
 
-#include "SemiLegalizer.h"
-#include "TestCaseManager.h"
-#include "db_sta/dbNetwork.hh"
-#include "db_sta/dbSta.hh"
-#include "dpl/Opendp.h"
-#include "dpo/Optdp.h"
-#include "gpl/Replace.h"
-#include "odb/db.h"
-#include "par/PartitionMgr.h"
-#include "utl/Logger.h"
+namespace odb {
+class dbDatabase;
+class dbBlock;
+class dbTech;
+class dbLib;
+class dbInst;
+}  // namespace odb
+namespace sta {
+class dbSta;
+}
+namespace par {
+class PartitionMgr;
+}
+namespace gpl {
+class Replace;
+}
+namespace utl {
+class Logger;
+}
+namespace dpl {
+class Opendp;
+}
 
 namespace mdm {
 class MultiDieManager;
+class TestCaseManager;
 
 class SwitchInstanceHelper
 {
@@ -93,8 +106,8 @@ class MultiDieManager
 
   odb::dbDatabase* getDB() { return db_; }
 
-  void get3DHPWL(bool approximate=true);
-  void getHPWL(const char* dieInfo=nullptr);
+  void get3DHPWL(bool approximate = true);
+  void getHPWL(const char* dieInfo = nullptr);
 
   /**
    * \brief
@@ -112,7 +125,7 @@ class MultiDieManager
 
   void multiDieDPO();
 
-  void runSemiLegalizer(char* targetDie="");
+  void runSemiLegalizer(char* targetDie = "");
 
   /**
    * \pre
@@ -131,7 +144,7 @@ class MultiDieManager
 
   void timingTestOneDie();
 
-  void ICCADParse(const std::string& testCase, bool siteDefined=false);
+  void ICCADParse(const std::string& testCase, bool siteDefined = false);
 
   void setPartitionFile(char* partitionFile);
 
@@ -149,7 +162,8 @@ class MultiDieManager
    * This is Experiment utilization.
    * \brief
    * This is Experiment utilization.
-   * Imports and parses exported file to temporarily retrieve die coordinates for debugging.
+   * Imports and parses exported file to temporarily retrieve die coordinates
+   * for debugging.
    * */
   void importCoordinates(char* fileName);
 
@@ -168,7 +182,7 @@ class MultiDieManager
    * */
   void readPartitionInfo(const char* fileNameChar);
 
-  void parseICCADOutput(char* filenameChar, char* whichDie="");
+  void parseICCADOutput(char* filenameChar, char* whichDie = "");
 
  private:
   odb::dbTech* makeNewTech(const std::string& techName);
@@ -218,8 +232,6 @@ class MultiDieManager
                        const odb::dbInst* inst1,
                        const odb::dbInst* inst2) const;
 
-  TestCaseManager testCaseManager_;
-
   odb::dbDatabase* db_{};
   utl::Logger* logger_{};
   par::PartitionMgr* partitionMgr_{};
@@ -227,6 +239,7 @@ class MultiDieManager
   dpl::Opendp* opendp_{};
   sta::dbSta* sta_{};
 
+  TestCaseManager* testCaseManager_{};
   int numberOfDie_{};
   float shrinkAreaRatio_{};
   std::vector<float> shrinkLengthRatios_;
