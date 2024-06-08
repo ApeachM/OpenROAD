@@ -45,6 +45,7 @@ target_link_libraries(mdm PRIVATE mdm_lib)
 
 target_sources(mdm_lib
         PRIVATE
+        src/MakeMultiDieManager.cc
         src/MultiDieManager.cc
         src/SwitchInstHelper.cpp
         src/AppManager.cpp
@@ -52,12 +53,8 @@ target_sources(mdm_lib
         src/TestCaseManager.cpp
         src/SemiLegalizer.cpp
 )
-target_sources(mdm
-        PRIVATE
-        src/MakeMultiDieManager.cc
-)
 
-target_include_directories(mdm_lib PUBLIC include)
+target_include_directories(mdm_lib PUBLIC include src)
 target_include_directories(mdm PUBLIC include)
 
 target_link_libraries(mdm_lib
@@ -71,6 +68,6 @@ target_link_libraries(mdm_lib
         dpo
 )
 
-if (ENABLE_TESTS)
-    add_subdirectory(test/cpp)
-endif ()
+messages(
+        TARGET mdm
+)
