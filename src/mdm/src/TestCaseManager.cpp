@@ -53,6 +53,13 @@ void MultiDieManager::ICCADParse(const std::string& testCase, bool siteDefined)
       {"2022-test3-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE3_H, this); }},
       {"2022-test4", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE4, this); }},
       {"2022-test4-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE4_H, this); }},
+      {"2023-test1", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE1, this); }},
+      {"2023-test2", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE2, this); }},
+      {"2023-test2-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE2_H, this); }},
+      {"2023-test3", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE3, this); }},
+      {"2023-test3-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE3_H, this); }},
+      {"2023-test4", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE4, this); }},
+      {"2023-test4-h", [this]() { testCaseManager_->ICCADContest(TestCaseManager::ICCAD2022_CASE4_H, this); }}
   };
   // clang-format on
 
