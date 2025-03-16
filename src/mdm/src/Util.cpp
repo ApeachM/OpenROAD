@@ -1073,8 +1073,9 @@ void MultiDieManager::importCoordinates(char* fileName)
 }
 void MultiDieManager::destroyOneDie(char* DIE)
 {
+  readPartitionInfo(partitionFile_.c_str());
   int dieID;
-  if (DIE == "TOP") {
+  if (strcmp(DIE, "TOP")) {
     dieID = 0;
   } else {
     dieID = 1;
